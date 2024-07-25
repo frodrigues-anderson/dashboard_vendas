@@ -319,13 +319,14 @@ def visual01(cliente, mes,categoria,toggle):
 @app.callback(
     Output('Visual02', 'figure'),
     [
-        Input('radio_lojas', 'value'),
+        Input('loja', 'value'),
+        Input('Quantidade', 'value'),
         Input(ThemeSwitchAIO.ids.switch('theme'), 'value')
     ]
 )
 
 
-def visual02(loja,toggle):
+def visual02(loja,Quantidade,toggle):
     
     template = dark_tema if toggle else vapor_tema
     
