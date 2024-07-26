@@ -142,7 +142,7 @@ def filtro_quantidade(quantidade_selecionada):
 
 app = dash.Dash(__name__)
 
-
+server = app.server
 
 
 # Montando Layout _______________________________________________________________________________________
