@@ -317,16 +317,16 @@ def visual01(cliente, mes,categoria,toggle):
 
 
 @app.callback(
-    Output('Visual02', 'figure'),
+    Output('visual02', 'figure'),
     [
-        Input('loja', 'value'),
-        Input('Quantidade', 'value'),
+        Input('radio_categoria','value'),
+        Input('radio_meses', 'value'),
         Input(ThemeSwitchAIO.ids.switch('theme'), 'value')
     ]
 )
 
 
-def visual02(loja,Quantidade,toggle):
+def visual02(categoria,mes,toggle):
     
     template = dark_tema if toggle else vapor_tema
     
@@ -335,41 +335,62 @@ def visual02(loja,Quantidade,toggle):
     # else:
     #     template =vapor_tema
     
-    nome_loja = filtro_categoria(loja)
+    nome_categoria = filtro_categoria(categoria)
+    nome_mes = filtro_mes(mes)
     
-    filtros = nome_loja
+    filtros = nome_categoria & nome_mes
     
-    df2 = df.loc[filtros]
+    df1 = df.loc[filtros]
+    
+    # agrupando tolta de vendas por lojas
+    
+    df_lojas = df1.groupby(['Mês','Loja'])['Total'].mean().reset_index()
+    # df_top5 = df_lojas.sort_values(by='Total', ascending=False).head(5)
     
     
-    df_grupo1 = df2.groupby(['Loja', 'Quantidade'])['Total'].sum().reset_index()
-    df_top5 = df_grupo1.sort_values(by='Total', ascending=False).head(5)
+    fig2 = go.Figure()
     
-    fig2 = px.bar(
-        df_top5,
-        x='Loja',
-        y='Quantidade',
-        text='Total',
-        color_continuous_scale='Blues',
-        height=280,
-        template=template
-    ) 
+    for loja in df_lojas['Loja'].unique():
+        dados = df_lojas[ df_lojas['Loja'] == loja ]
+        
+        fig2.add_trace(
+            
+            go.Scatter(
+                x= df_lojas['Mês'],
+                y=df_lojas['Total'],
+                mode='markers',
+                marker=dict(
+                    size=15,
+                    opacity=0.5 #df_lojas['Total'].min() * 0
+                )
+            )
+        )
+        
+    # fig2 = px.bar(
+    #     df_top5,
+    #     x='Loja',
+    #     y='Quantidade',
+    #     text='Total',
+    #     color_continuous_scale='Blues',
+    #     height=280,
+    #     template=template
+    # ) 
     
-    fig2.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    # fig2.update_traces(texttemplate='%{text:.2s}', textposition='outside')
     
-    fig2.update_layout(
-        margin={'t': 0},
-        xaxis={'showgrid': False},
-        yaxis={'showgrid': False,
-               'range' : [ df_top5['Total'].min() * 0, df_top5['Total'].max() * 1.2]
-        }, 
-        xaxis_title=None,
-        yaxis_title=None, 
-        xaxis_tickangle=-15,
-        font={'size':13},
-        plot_bgcolor = 'rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
+    # fig2.update_layout(
+    #     margin={'t': 0},
+    #     xaxis={'showgrid': False},
+    #     yaxis={'showgrid': False,
+    #            'range' : [ df_top5['Total'].min() * 0, df_top5['Total'].max() * 1.2]
+    #     }, 
+    #     xaxis_title=None,
+    #     yaxis_title=None, 
+    #     xaxis_tickangle=-15,
+    #     font={'size':13},
+    #     plot_bgcolor = 'rgba(0,0,0,0)',
+    #     paper_bgcolor='rgba(0,0,0,0)'
+    # )
     return fig2
 # Subindo servidor_______________________________________________________________________________________
 
