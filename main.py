@@ -37,6 +37,9 @@ df['Quantidade'] = df['Quantidade']
 
 lista_meses = []
 
+
+df = df[df['Mês'].notna()]
+df = df[df['Mês'] != '']
 for mes in df['Mês'].unique():
     lista_meses.append({
         'label': mes,
@@ -344,15 +347,25 @@ def visual02(categoria,mes,toggle):
     
     # agrupando tolta de vendas por lojas
     
-    df_lojas = df1.groupby(['Mês','Loja'])['Total'].mean().reset_index()
-    # df_top5 = df_lojas.sort_values(by='Total', ascending=False).head(5)
+    df_lojas_todas = df1.groupby(['Mês','Loja'])['Total'].mean().reset_index()
     
+    max_size = df_lojas_todas['Total'].max()
+    min_size = df_lojas_todas['Total'].min()
     
+    cores_map = {
+        'Rio de Janeiro' : 'red',
+        'Salvador' : 'green',
+        'Santos' : 'white',
+        'São Paulo' : 'silver',
+        'Três Rios' : 'pink'
+    }
+    
+    order_meses_x = ['JAN','FEB','MAR', 'APR', 'MAY','JUN','JUL','AUG','SET','OCT','NOV','DEC']
     fig2 = go.Figure()
     
-    for loja in df_lojas['Loja'].unique():
-        dados = df_lojas[ df_lojas['Loja'] == loja ]
-        
+    for loja in df_lojas_todas['Loja'].unique():
+        df_lojas = df_lojas_todas[df_lojas_todas['Loja'] == loja ]
+        cor = cores_map.get(loja)
         fig2.add_trace(
             
             go.Scatter(
@@ -360,37 +373,27 @@ def visual02(categoria,mes,toggle):
                 y=df_lojas['Total'],
                 mode='markers',
                 marker=dict(
-                    size=15,
-                    opacity=0.5 #df_lojas['Total'].min() * 0
-                )
+                    color=cor,
+                    size=(df_lojas['Total'] - min_size) / (max_size - min_size) * 50,
+                    opacity=0.5,
+                    line=dict(color=cor)
+                ), name = str(loja)
             )
         )
-        
-    # fig2 = px.bar(
-    #     df_top5,
-    #     x='Loja',
-    #     y='Quantidade',
-    #     text='Total',
-    #     color_continuous_scale='Blues',
-    #     height=280,
-    #     template=template
-    # ) 
-    
-    # fig2.update_traces(texttemplate='%{text:.2s}', textposition='outside')
-    
-    # fig2.update_layout(
-    #     margin={'t': 0},
-    #     xaxis={'showgrid': False},
-    #     yaxis={'showgrid': False,
-    #            'range' : [ df_top5['Total'].min() * 0, df_top5['Total'].max() * 1.2]
-    #     }, 
-    #     xaxis_title=None,
-    #     yaxis_title=None, 
-    #     xaxis_tickangle=-15,
-    #     font={'size':13},
-    #     plot_bgcolor = 'rgba(0,0,0,0)',
-    #     paper_bgcolor='rgba(0,0,0,0)'
-    # )
+      
+    fig2.update_layout(
+        margin=dict(t=0),
+        template=template,
+        plot_bgcolor= 'rgba(0,0,0,0)',
+        paper_bgcolor = 'rgba(0,0,0,0)',
+        xaxis = dict(
+            categoryorder='array',
+            categoryarray=order_meses_x,
+            showgrid=False
+        ),
+        yaxis = dict(showgrid=False)
+    )  
+ 
     return fig2
 # Subindo servidor_______________________________________________________________________________________
 
