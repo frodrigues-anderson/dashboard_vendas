@@ -228,12 +228,14 @@ linha_1 = html.Div([
 linha_2 = html.Div([
     
         dcc.Graph(id='visual02', style={'width' : '65%'}),
-        dcc.Graph(id='visual03', style={'width' : '30%'})
+        dcc.Graph(id='visual03', style={'width' : '35%'})
 
 ], style={
     'display':'flex',
     'justify-content' : 'space-around',
-    'height': '300px'
+    'height': '300px',
+    'margin-top' : '20px',
+    'vertical-align' : 'center'
 })
 
 
