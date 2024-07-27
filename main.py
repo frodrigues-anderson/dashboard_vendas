@@ -320,7 +320,10 @@ def visual01(cliente, mes,categoria,toggle):
 
 
 @app.callback(
-    Output('visual02', 'figure'),
+    [
+        Output('visual02', 'figure'),
+        Output('visual03', 'figure')
+    ],
     [
         Input('radio_categoria','value'),
         Input('radio_meses', 'value'),
@@ -341,16 +344,24 @@ def visual02(categoria,mes,toggle):
     nome_categoria = filtro_categoria(categoria)
     nome_mes = filtro_mes(mes)
     
-    filtros = nome_categoria & nome_mes
+    # filtros = nome_categoria & nome_mes
+    filtros_categoria = nome_categoria
+    filtro_mes_categoria = nome_categoria & nome_mes
     
-    df1 = df.loc[filtros]
+    # df1 = df.loc[filtros]
+    
+    df2 = df.loc[filtros_categoria]
+    df3 = df.loc[filtro_mes_categoria]
+    
     
     # agrupando tolta de vendas por lojas
     
-    df_lojas_todas = df1.groupby(['Mês','Loja'])['Total'].mean().reset_index()
+    df_lojas_todas2 = df2.groupby(['Mês','Loja'])['Total'].mean().reset_index()
     
-    max_size = df_lojas_todas['Total'].max()
-    min_size = df_lojas_todas['Total'].min()
+    df_lojas_todas3 = df3.groupby(['Mês','Loja'])['Total'].sum().reset_index()
+
+    max_size = df_lojas_todas2['Total'].max()
+    min_size = df_lojas_todas2['Total'].min()
     
     cores_map = {
         'Rio de Janeiro' : 'red',
@@ -363,8 +374,8 @@ def visual02(categoria,mes,toggle):
     order_meses_x = ['JAN','FEB','MAR', 'APR', 'MAY','JUN','JUL','AUG','SET','OCT','NOV','DEC']
     fig2 = go.Figure()
     
-    for loja in df_lojas_todas['Loja'].unique():
-        df_lojas = df_lojas_todas[df_lojas_todas['Loja'] == loja ]
+    for loja in df_lojas_todas2['Loja'].unique():
+        df_lojas = df_lojas_todas2[df_lojas_todas2['Loja'] == loja ]
         cor = cores_map.get(loja)
         fig2.add_trace(
             
@@ -394,7 +405,45 @@ def visual02(categoria,mes,toggle):
         yaxis = dict(showgrid=False)
     )  
  
-    return fig2
+ 
+ # visual03______________________________________________________________________________________________
+ 
+    fig3 = go.Figure(data=go.Scatterpolar(
+        r=df_lojas_todas3['Total'],
+        theta = df_lojas_todas3['Loja'],
+        line=dict(color='rgb(31,119,180)'),
+        marker=dict(color='rgb(31,119,180)', size=7),
+        opacity=0.8        
+    ))
+    
+    fig3.update_layout(
+        template=template,
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                tickfont=dict(size=10),
+                tickangle=0,
+                tickcolor='rgba(68,68,68,0)',
+                ticklen=5,
+                tickwidth=1,
+                tickprefix='',
+                ticksuffix='',
+                range=[0, max(df_lojas_todas3['Total']) + 1000 ]
+            )
+        ),
+        font=dict(
+            family='Fira Code',
+            size=12
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=40, r=40, t=80, b=40)
+    )
+
+
+    return fig2, fig3
+
+
 # Subindo servidor_______________________________________________________________________________________
 
 if __name__ =='__main__' : app.run_server(debug=True)
