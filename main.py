@@ -413,6 +413,7 @@ def visual02(categoria,mes,toggle):
         theta = df_lojas_todas3['Loja'],
         line=dict(color='rgb(31,119,180)'),
         marker=dict(color='rgb(31,119,180)', size=7),
+        fill='toself',
         opacity=0.8        
     ))
     
